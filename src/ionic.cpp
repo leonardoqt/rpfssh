@@ -100,6 +100,11 @@ void ionic::try_hop(potential &HH, arma::cx_mat rho, arma::mat hop_bath)
 		}
 	//
 	// adjust velocity
+	// TODO: since etot  = Ef + Eion and Ef is a function of (x,p)
+	// the current ek should only be regarded as a temporary variable
+	// that only works when H_pd = H, i.e., the Hamiltonian is real
+	// the velocity rescaling must be revised along with Ef when decided
+	// what is the electronic energy
 	if (from_bath == 0)
 	{
 		double dene = Ef(new_state) - Ef(istate);
@@ -126,7 +131,7 @@ void ionic::try_hop(potential &HH, arma::cx_mat rho, arma::mat hop_bath)
 	istate = new_state;
 	double Eion;
 	HH.ionic(x,Eion,vt1);
-	etot = ek + Ef(istate) + Eion;
+	etot = Ef(istate) + Eion;
 }
 
 //int ionic::check_stop()

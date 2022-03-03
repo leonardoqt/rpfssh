@@ -47,11 +47,12 @@ void potential::gen_Hf_pd(vec x, vec p, mat &Hf_pd, cx_mat &Uf_pd)
 	gen_Hs_pd(x,p,Hs_pd,Us_pd);
 	Hf_pd = zeros<mat>(sz_f,sz_f);
 	Hf_pd(0,0) = dot(p,p)/2/mass;
-	Hf_pd(3,3) = Hs_pd(0,0) + Hs_pd(1,1) + dot(p,p)/2/mass;
+	Hf_pd(3,3) = Hs_pd(0,0) + Hs_pd(1,1) - Hf_pd(0,0);
 	Hf_pd(span(1,sz_s),span(1,sz_s)) = Hs_pd;
 	//
 	Uf_pd = eye(sz_f,sz_f);
 	Uf_pd(span(1,sz_s),span(1,sz_s)) = Us_pd;
+	Uf_pd(3,3) = Us_pd(1,1);
 }
 
 void potential::ionic(vec x, double& Eion, vec& dEdx)
@@ -64,13 +65,18 @@ void potential::ionic(vec x, double& Eion, vec& dEdx)
 
 void potential::E_Hf_pd(vec x, vec p, vec& Ef, mat& Uf, vec& Gammal, vec& Gammar)
 {
-	mat Hf_pd,Us;
-	cx_mat Uf_pd,Us_pd;
-	gen_Hf_pd(x,p,Hf_pd,Uf_pd);
-	eig_sym(Ef,Uf,Hf_pd);
+	vec Es;
+	mat Hs_pd, Us;
+	cx_mat Us_pd;
+	gen_Hs_pd(x,p,Hs_pd,Us_pd);
+	eig_sym(Es,Us,Hs_pd);
+	Ef = zeros<vec>(sz_f);
+	Ef(0) = dot(p,p)/2/mass;
+	Ef.rows(1,sz_s) = Es;
+	Ef(3) = Ef(1)+Ef(2)-Ef(0);
+	Uf = eye(sz_f,sz_f);
+	Uf(span(1,sz_s),span(1,sz_s)) = Us;
 	//
-	Us_pd = Uf_pd(span(1,sz_s),span(1,sz_s));
-	Us = Uf(span(1,sz_s),span(1,sz_s));
 	cx_vec vsbl_a = Us.t()*Us_pd.t()*vsbl;
 	cx_vec vsbr_a = Us.t()*Us_pd.t()*vsbr;
 	Gammal = square(abs(vsbl_a));

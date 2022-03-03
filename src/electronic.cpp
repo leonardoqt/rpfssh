@@ -63,8 +63,8 @@ cx_mat electronic::rho_dot(potential& HH, vec E0, cx_mat Dvt, vec Gl, vec Gr, cx
 cx_mat electronic::Lrho(potential& HH, vec E0, vec Gl, vec Gr, cx_mat rho0)
 {
 	vec fl(sz_s,fill::zeros), fr(sz_s,fill::zeros);
-	fl = 1 / ( 1 + exp(beta*(E0.rows(1,sz_s)-HH.mul)) );
-	fr = 1 / ( 1 + exp(beta*(E0.rows(1,sz_s)-HH.mur)) );
+	fl = 1 / ( 1 + exp(beta*(E0.rows(1,sz_s)-E0(0)-HH.mul)) );
+	fr = 1 / ( 1 + exp(beta*(E0.rows(1,sz_s)-E0(0)-HH.mur)) );
 	//
 	cube LL(sz_f,sz_f,8);
 	LL(1,0,0) = LL(3,2,1) = LL(0,1,2) = LL(2,3,3) = 1;
