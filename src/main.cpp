@@ -22,24 +22,22 @@ int main()
 	MPI_Comm_size(MPI_COMM_WORLD,&size);
 	arma_rng::set_seed(now.time_since_epoch().count()+rank*10);
 	//
-	double gamma = 0.003, Temp = 0.03, omega = 0.003, Ed = 0.0, g0 = 0.005;
+	double gamma = 0.003, Temp = 0.03, omega = 0.003, gap = 0.03;
 	//
 	double ek0 = 1e-3, ek1 = 1e-1;
 	int nek = 60, state = 0, sample = 10000;
-	double damping = 0.2, dt = 1.0, Tmax = 100000;
+	double dt = 1.0, Tmax = 100000;
 	//
 	if ( rank == 0 )
-		cin>>omega>>Ed>>g0>>gamma>>Temp>>ek0>>ek1>>nek>>sample>>damping>>dt>>Tmax;
+		cin>>omega>>gap>>gamma>>Temp>>ek0>>ek1>>nek>>sample>>dt>>Tmax;
 	MPI_Bcast(&omega  ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
-	MPI_Bcast(&Ed     ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
-	MPI_Bcast(&g0     ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+	MPI_Bcast(&gap    ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&gamma  ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&Temp   ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&ek0    ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&ek1    ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&nek    ,1,MPI_INT,0,MPI_COMM_WORLD);
 	MPI_Bcast(&sample ,1,MPI_INT,0,MPI_COMM_WORLD);
-	MPI_Bcast(&damping,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&dt     ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&Tmax   ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	//====================
@@ -47,9 +45,8 @@ int main()
 	ionic AA;
 	electronic EE;
 	counter time_evo;
-	mat rho0(HH.sz_s,HH.sz_s,fill::zeros);
 	//
-	double mass = 1/omega;
+	double mass = 1000.0;
 	double beta = 1/Temp;
 	double xstart = 0.0;
 	double xend = 20.0;
@@ -60,10 +57,15 @@ int main()
 	//
 	vec vv = linspace(sqrt(2*ek0/mass),sqrt(2*ek1/mass),nek);
 	vec counter_t(HH.sz_f,fill::zeros), counter_r(HH.sz_f,fill::zeros);
+	mat rho0(HH.sz_f,HH.sz_f,fill::zeros);
+	rho0(0,0) = 1;
 	//
 	sample_myself = sample / size;
 	//
-	HH.init_H(omega,g0,Ed,gamma);
+	vec x0(2,fill::zeros), p0(2,fill::zeros);
+	vec gammal(2,fill::zeros);
+	gammal(0) = gamma;
+	HH.init_H(omega,gap,mass,0,0,gammal,gammal*0);
 	for (int iv = 0; iv<nek; iv++)
 	{
 		time_evo.init(2*dt,Tmax);
@@ -73,24 +75,23 @@ int main()
 		{
 			//TODO: no rand for testing
 			//AA.init(HH,mass,vv(iv)+randn()*(0.5/sigma_x)/mass,xstart+randn()*sigma_x,state,-xend,xend);
-			AA.init(mass,xstart,vv(iv),state,dt,2,-xend,xend);
-			EE.init_rho(rho0,HH,beta,damping,2*dt);
+			x0(0) = xstart;
+			p0(0) = vv(iv)*mass;
+			AA.init(mass,x0,p0,state,dt,2,-xend,xend);
+			EE.init(rho0,HH,beta,2*dt);
 			// run fssh
 			for(int iter = 0; iter*EE.dt < Tmax; iter++)
 			{
 				AA.move(HH);
 				AA.move(HH);
-				EE.evolve(HH,AA.x_t2,AA.x_t1,AA.x);
-				EE.fit_drho(HH,3);
+				EE.evolve(HH,AA.x_t2,AA.x_t1,AA.x,AA.p_t2,AA.p_t1,AA.p);
 				//EE.try_decoherence(AA);
-				AA.try_hop(HH,EE.rho_fock_old,EE.hop_bath);
+				AA.try_hop(HH,EE.rho,EE.hop_bath);
 				time_evo.add(iter,AA.ek,AA.etot,AA.istate,AA.nhops);
 				//cout<<iter*time_evo.dt<<'\t'<<abs(EE.rho_fock(0,0))<<'\t'<<abs(EE.rho_fock(1,1))<<endl;
-				if (abs(AA.check_stop()))
-					break;
 			}
 			// count rate
-			if (AA.x < 0)
+			if (AA.x(0) < 0)
 				counter_r(AA.istate) += 1.0;
 			else
 				counter_t(AA.istate) += 1.0;

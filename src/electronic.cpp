@@ -17,8 +17,7 @@ void electronic::init(mat Rho0, potential& HH, double Beta, double Dt)
 void electronic::evolve(potential &HH, vec x_t2, vec x_t1, vec x_t0, vec p_t2, vec p_t1, vec p_t0)
 {
 	// Use RK4
-	// Ndot = -i[H rho] - damping*(rho_b - rho_eq)
-	// rhodot = -i[H(x) rho] - [D(x) rho] + 
+	// rhodot = -i[H(x) rho] - [D(x) rho] + Lrho
 	if (first_evo)
 	{
 		first_evo = 0;

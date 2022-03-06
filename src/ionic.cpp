@@ -33,7 +33,7 @@ void ionic::move(potential& HH)
 	p = p - (dt/2)*(dHdx.col(istate)+dEiondx);
 	//
 	HH.dyn_Hf_pd(x,p,dHdx,dHdp);
-	x = x + dHdp * dt;
+	x = x + dHdp.col(istate) * dt;
 	//
 	HH.dyn_Hf_pd(x,p,dHdx,dHdp);
 	HH.ionic(x,Eion,dEiondx);
@@ -71,12 +71,14 @@ void ionic::try_hop(potential &HH, arma::cx_mat rho, arma::mat hop_bath)
 		else
 		{
 			rate_s(t1) = real( T(istate,t1)*rho(t1,istate) ) * 2 / real(rho(istate,istate));
-			rate_b(t1) = ( hop_bath(t1,istate)*real(rho(istate,istate))-hop_bath(istate,t1)*real(rho(t1,t1)) )/real(rho(istate,istate)) * dt*hop_period;
+			//rate_b(t1) = ( hop_bath(t1,istate)*real(rho(istate,istate))-hop_bath(istate,t1)*real(rho(t1,t1)) )/real(rho(istate,istate)) * dt*hop_period;
+			rate_b(t1) = hop_bath(t1,istate) * dt*hop_period;
 		}
 		if (rate_s(t1) < 0)
 			rate_s(t1) = 0;
 		if (rate_b(t1) < 0)
 			rate_b(t1) = 0;
+		// TODO: this is not correct unless ek does not couple to Ef, i.e., Hamiltonian is real
 		if (ek + Ef(istate) < Ef(t1))
 			rate_s(t1) = 0;
 	}
