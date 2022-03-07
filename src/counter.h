@@ -8,14 +8,14 @@ class counter;
 class counter
 {
 public:
-	int nbin;
+	int nbin, sz_f;
 	double dt;
-	double *ek, *et, *p0, *p1, *hop;
+	double *ek, *et, **pp, *hop;
 	int *count;
-	double *ek_all, *et_all, *p0_all, *p1_all, *hop_all;
+	double *ek_all, *et_all, **pp_all, *hop_all;
 	int *count_all;
 	//
-	void init(double Dt, double Tmax);
+	void init(int Sz, double Dt, double Tmax);
 	void add(int niter, double eki, double eti, int istate, int hopi);
 	void average();
 	void print_ene(std::ofstream& output);

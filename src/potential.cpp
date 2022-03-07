@@ -18,12 +18,13 @@ void potential::init_H(double Kx, double Chi, double Ky, double Delta, double V0
 	vsbr = sqrt(Gammar);
 }
 
-void potential::init_H(double Omega, double Gap, double Mass, double Mul, double Mur, arma::vec Gammal, arma::vec Gammar)
+void potential::init_H(double Omega, double Gap, double De, double Mass, double Mul, double Mur, arma::vec Gammal, arma::vec Gammar)
 {
 	if_test = 1;
 	omega  = Omega;
 	gap = Gap;
 	b = sqrt(4*omega*gap);
+	de = De;
 	mass = Mass;
 	mul = Mul;
 	mur = Mur;
@@ -36,8 +37,8 @@ cx_mat potential::Hs(vec x)
 	cx_mat HH(sz_s,sz_s,fill::zeros);
 	if(if_test)
 	{
-		HH(0,0) = cx_double(b*x(0)    , 0);
-		HH(1,1) = cx_double(b*x(0)+0.1, 0);
+		HH(0,0) = cx_double(b*x(0)   , 0);
+		HH(1,1) = cx_double(b*x(0)+de, 0);
 		return HH;
 	}
 	else

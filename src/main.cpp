@@ -22,16 +22,17 @@ int main()
 	MPI_Comm_size(MPI_COMM_WORLD,&size);
 	arma_rng::set_seed(now.time_since_epoch().count()+rank*10);
 	//
-	double gamma = 0.003, Temp = 0.03, omega = 0.003, gap = 0.03;
+	double gamma = 0.003, Temp = 0.03, omega = 0.003, gap = 0.03, de = 0.03;
 	//
 	double ek0 = 1e-3, ek1 = 1e-1;
 	int nek = 60, state = 0, sample = 10000;
 	double dt = 1.0, Tmax = 100000;
 	//
 	if ( rank == 0 )
-		cin>>omega>>gap>>gamma>>Temp>>ek0>>ek1>>nek>>sample>>dt>>Tmax;
+		cin>>omega>>gap>>de>>gamma>>Temp>>ek0>>ek1>>nek>>sample>>dt>>Tmax;
 	MPI_Bcast(&omega  ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&gap    ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+	MPI_Bcast(&de     ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&gamma  ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&Temp   ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&ek0    ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
@@ -64,11 +65,11 @@ int main()
 	//
 	vec x0(2,fill::zeros), p0(2,fill::zeros);
 	vec gammal(2,fill::zeros);
-	gammal(0) = gamma;
-	HH.init_H(omega,gap,mass,0,0,gammal,gammal*0);
+	gammal(0) = gammal(1) = gamma/2;
+	HH.init_H(omega,gap,de,mass,0,0,gammal,gammal*0);
 	for (int iv = 0; iv<nek; iv++)
 	{
-		time_evo.init(2*dt,Tmax);
+		time_evo.init(HH.sz_f,2*dt,Tmax);
 		counter_t = counter_t*0;
 		counter_r = counter_r*0;
 		for (int isample=0; isample<sample_myself;isample++)
@@ -109,8 +110,8 @@ int main()
 		//
 		MPI_Allreduce(time_evo.ek,time_evo.ek_all,time_evo.nbin,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
 		MPI_Allreduce(time_evo.et,time_evo.et_all,time_evo.nbin,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
-		MPI_Allreduce(time_evo.p0,time_evo.p0_all,time_evo.nbin,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
-		MPI_Allreduce(time_evo.p1,time_evo.p1_all,time_evo.nbin,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+		for(int t1=0; t1<time_evo.sz_f; t1++)
+			MPI_Allreduce(time_evo.pp[t1],time_evo.pp_all[t1],time_evo.nbin,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
 		MPI_Allreduce(time_evo.hop,time_evo.hop_all,time_evo.nbin,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
 		MPI_Allreduce(time_evo.count,time_evo.count_all,time_evo.nbin,MPI_INT,MPI_SUM,MPI_COMM_WORLD);
 		// print
