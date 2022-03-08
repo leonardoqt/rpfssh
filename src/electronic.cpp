@@ -73,22 +73,22 @@ cx_mat electronic::Lrho(potential& HH, vec E0, vec Gl, vec Gr, cx_mat rho0)
 	mat L;
 	//
 	L = LL.slice(0);
-	res += (Gl(0)*fl(0)+Gr(0)*fr(0)) * ( L*rho0*L.t() - (L.t()*L*rho+rho*L.t()*L)/2 );
+	res += (Gl(0)*fl(0)+Gr(0)*fr(0)) * ( L*rho0*L.t() - (L.t()*L*rho0+rho0*L.t()*L)/2 );
 	L = LL.slice(1);
-	res += (Gl(0)*fl(0)+Gr(0)*fr(0)) * ( L*rho0*L.t() - (L.t()*L*rho+rho*L.t()*L)/2 );
+	res += (Gl(0)*fl(0)+Gr(0)*fr(0)) * ( L*rho0*L.t() - (L.t()*L*rho0+rho0*L.t()*L)/2 );
 	L = LL.slice(2);
-	res += (Gl(0)*(1-fl(0))+Gr(0)*(1-fr(0))) * ( L*rho0*L.t() - (L.t()*L*rho+rho*L.t()*L)/2 );
+	res += (Gl(0)*(1-fl(0))+Gr(0)*(1-fr(0))) * ( L*rho0*L.t() - (L.t()*L*rho0+rho0*L.t()*L)/2 );
 	L = LL.slice(3);
-	res += (Gl(0)*(1-fl(0))+Gr(0)*(1-fr(0))) * ( L*rho0*L.t() - (L.t()*L*rho+rho*L.t()*L)/2 );
+	res += (Gl(0)*(1-fl(0))+Gr(0)*(1-fr(0))) * ( L*rho0*L.t() - (L.t()*L*rho0+rho0*L.t()*L)/2 );
 	//
 	L = LL.slice(4);
-	res += (Gl(1)*fl(1)+Gr(1)*fr(1)) * ( L*rho0*L.t() - (L.t()*L*rho+rho*L.t()*L)/2 );
+	res += (Gl(1)*fl(1)+Gr(1)*fr(1)) * ( L*rho0*L.t() - (L.t()*L*rho0+rho0*L.t()*L)/2 );
 	L = LL.slice(5);
-	res += (Gl(1)*fl(1)+Gr(1)*fr(1)) * ( L*rho0*L.t() - (L.t()*L*rho+rho*L.t()*L)/2 );
+	res += (Gl(1)*fl(1)+Gr(1)*fr(1)) * ( L*rho0*L.t() - (L.t()*L*rho0+rho0*L.t()*L)/2 );
 	L = LL.slice(6);
-	res += (Gl(1)*(1-fl(1))+Gr(1)*(1-fr(1))) * ( L*rho0*L.t() - (L.t()*L*rho+rho*L.t()*L)/2 );
+	res += (Gl(1)*(1-fl(1))+Gr(1)*(1-fr(1))) * ( L*rho0*L.t() - (L.t()*L*rho0+rho0*L.t()*L)/2 );
 	L = LL.slice(7);
-	res += (Gl(1)*(1-fl(1))+Gr(1)*(1-fr(1))) * ( L*rho0*L.t() - (L.t()*L*rho+rho*L.t()*L)/2 );
+	res += (Gl(1)*(1-fl(1))+Gr(1)*(1-fr(1))) * ( L*rho0*L.t() - (L.t()*L*rho0+rho0*L.t()*L)/2 );
 	//
 	hop_bath(1,0) = hop_bath(3,2) = Gl(0)*fl(0)+Gr(0)*fr(0);
 	hop_bath(2,0) = hop_bath(3,1) = Gl(1)*fl(1)+Gr(1)*fr(1);
