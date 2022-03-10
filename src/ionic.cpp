@@ -82,7 +82,7 @@ void ionic::try_hop(potential &HH, arma::cx_mat rho, arma::mat hop_bath)
 		if (ek + Ef(istate) < Ef(t1))
 			rate_s(t1) = 0;
 	}
-	//rate_s.t().print();
+	//rate_s.t().print("rate_s");
 	//rate_b.t().print();
 	//cout<<endl;
 	//

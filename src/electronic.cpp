@@ -34,9 +34,9 @@ void electronic::evolve(potential &HH, vec x_t2, vec x_t1, vec x_t0, vec p_t2, v
 	HH.E_Hf_pd(x_t2,p_t2,E_t2,U_t2,Gl_t2,Gr_t2);
 	HH.E_Hf_pd(x_t1,p_t1,E_t1,U_t1,Gl_t1,Gr_t1);
 	HH.E_Hf_pd(x_t0,p_t0,E_t0,U_t0,Gl_t0,Gr_t0);
-	Dvt_t2 = logmat(U_t3.t()*U_t2);
-	Dvt_t1 = logmat(U_t2.t()*U_t1);
-	Dvt_t0 = logmat(U_t1.t()*U_t0);
+	Dvt_t2 = HH.ddt_f(x_last,x_t2,p_last,p_t2);
+	Dvt_t1 = HH.ddt_f(x_t2,x_t1,p_t2,p_t1);
+	Dvt_t0 = HH.ddt_f(x_t1,x_t0,p_t1,p_t0);
 	//
 	cx_mat k1,k2,k3,k4;
 	k1 = rho_dot(HH,E_t2,Dvt_t2,Gl_t2,Gr_t2,rho);

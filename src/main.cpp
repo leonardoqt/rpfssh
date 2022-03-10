@@ -48,7 +48,7 @@ int main()
 	electronic EE;
 	counter time_evo;
 	//
-	double mass = 2000.0;
+	double mass = 1000.0;
 	double beta = 1/Temp;
 	double xstart = 0.0;
 	double xend = 20.0;
