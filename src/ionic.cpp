@@ -61,6 +61,22 @@ void ionic::try_hop(potential &HH, arma::cx_mat rho, arma::mat hop_bath)
 	mat mt1;
 	HH.E_Hf_pd(x,p,Ef,mt1,vt1,vt2);
 	//
+	double dx = 1e-5;
+	vec x_t1, x_t2;
+	cx_mat DD;
+	vec dp(HH.dim,fill::zeros);
+	// for two impurities, rescale only occurs between 1,2
+	for (int t1=0; t1<HH.dim; t1++)
+	{
+		x_t1 = x_t2 = x;
+		x_t1(t1) -= dx;
+		x_t2(t1) += dx;
+		// TODO: check the meaning of DD and p dependence of DD
+		DD = HH.ddt_f(x_t1,x_t2,p,p);
+		dp(t1) = real(DD(1,2))/2/dx;
+	}
+	if (dot(p,dp)<0) dp*=-1;
+	//
 	for (int t1=0; t1<HH.sz_f; t1++)
 	{
 		if (t1==istate)
@@ -78,8 +94,8 @@ void ionic::try_hop(potential &HH, arma::cx_mat rho, arma::mat hop_bath)
 			rate_s(t1) = 0;
 		if (rate_b(t1) < 0)
 			rate_b(t1) = 0;
-		// TODO: this is not correct unless ek does not couple to Ef, i.e., Hamiltonian is real
-		if (ek + Ef(istate) < Ef(t1))
+		// TODO: this may not be correct for general H, but for V = V(x)*e^iwy it should work
+		if ( dot(p,dp)*dot(p,dp) < 2*mass*dot(dp,dp)*(Ef(t1)-Ef(istate)) )
 			rate_s(t1) = 0;
 	}
 	//rate_s.t().print("rate_s");
@@ -110,23 +126,8 @@ void ionic::try_hop(potential &HH, arma::cx_mat rho, arma::mat hop_bath)
 	if (from_bath == 0)
 	{
 		double dene = Ef(new_state) - Ef(istate);
-		double dx = 1e-5;
-		vec x_t1, x_t2;
-		cx_mat DD;
-		vec dp(HH.dim,fill::zeros);
-		// for two impurities, rescale only occurs between 1,2
-		for (int t1=0; t1<HH.dim; t1++)
-		{
-			x_t1 = x_t2 = x;
-			x_t1(t1) -= dx;
-			x_t2(t1) += dx;
-			// TODO: check the meaning of DD and p dependence of DD
-			DD = HH.ddt_f(x_t1,x_t2,p,p);
-			dp(t1) = real(DD(1,2))/2/dx;
-		}
 		//dp.t().print("dp");
 		//rate_s.t().print("rate");
-		if (dot(p,dp)<0) dp*=-1;
 		// p^2 = (p+a*dp)^2 + 2m*deme
 		p += ( sqrt(4*dot(p,dp)*dot(p,dp)-8*mass*dene*dot(dp,dp)) - 2*dot(p,dp) ) / (2*dot(dp,dp)) * dp;
 		ek = dot(p,p)/2/mass;
