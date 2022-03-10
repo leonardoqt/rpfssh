@@ -18,13 +18,14 @@ void potential::init_H(double Kx, double Chi, double Ky, double Delta, double V0
 	vsbr = sqrt(Gammar);
 }
 
-void potential::init_H(double Omega, double Gap, double De, double Mass, double Mul, double Mur, arma::vec Gammal, arma::vec Gammar)
+void potential::init_H(double Omega, double Gap, double De, double W, double Mass, double Mul, double Mur, arma::vec Gammal, arma::vec Gammar)
 {
 	if_test = 1;
 	omega  = Omega;
 	gap = Gap;
 	b = sqrt(4*omega*gap);
 	de = De;
+	w = W;
 	mass = Mass;
 	mul = Mul;
 	mur = Mur;
@@ -37,8 +38,11 @@ cx_mat potential::Hs(vec x)
 	cx_mat HH(sz_s,sz_s,fill::zeros);
 	if(if_test)
 	{
-		HH(0,0) = cx_double(b*x(0)   , 0);
+		//HH(0,0) = cx_double(b*x(0)   , 0);
+		HH(0,0) = cx_double(0, 0);
 		HH(1,1) = cx_double(b*x(0)+de, 0);
+		HH(0,1) = cx_double(cos(w*x(1)), sin(w*x(1)) ) * (gap/4*exp(-0.03*x(0)*x(0)));
+		HH(1,0) = cx_double(cos(w*x(1)),-sin(w*x(1)) ) * (gap/4*exp(-0.03*x(0)*x(0)));
 		return HH;
 	}
 	else
@@ -53,13 +57,13 @@ cx_mat potential::Hs(vec x)
 
 void potential::gen_Hs_pd(vec x, vec p, mat &Hs_pd, cx_mat &Us_pd)
 {
-	if (if_test)
-	{
-		Hs_pd = real(Hs(x)) + dot(p,p)/2/mass*eye(sz_s,sz_s);
-		Us_pd = cx_mat(eye(sz_s,sz_s),zeros<mat>(sz_s,sz_s));
-	}
-	else
-	{
+	//if (if_test)
+	//{
+	//	Hs_pd = real(Hs(x)) + dot(p,p)/2/mass*eye(sz_s,sz_s);
+	//	Us_pd = cx_mat(eye(sz_s,sz_s),zeros<mat>(sz_s,sz_s));
+	//}
+	//else
+	//{
 		Us_pd = zeros<cx_mat>(sz_s,sz_s);
 		Us_pd(0,0) = cx_double(1,0);
 		Us_pd(1,1) = cx_double(cos(w*x(1)),-sin(w*x(1)));
@@ -69,7 +73,7 @@ void potential::gen_Hs_pd(vec x, vec p, mat &Hs_pd, cx_mat &Us_pd)
 		p_tmp(0,0) = p(1);
 		p_tmp(1,1) = p(1)-w;
 		Hs_pd += p_tmp*p_tmp/2/mass;
-	}
+	//}
 }
 
 void potential::gen_Hf_pd(vec x, vec p, mat &Hf_pd, cx_mat &Uf_pd)

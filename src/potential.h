@@ -21,7 +21,7 @@ public:
 	double mul, mur;
 	arma::vec vsbl, vsbr;
 	void init_H(double Kx, double Chi, double Ky, double Delta, double V0, double W, double Mass, double Mul, double Mur, arma::vec Gammal, arma::vec Gammar);
-	void init_H(double Omega, double Gap, double De, double Mass, double Mul, double Mur, arma::vec Gammal, arma::vec Gammar);
+	void init_H(double Omega, double Gap, double De, double W, double Mass, double Mul, double Mur, arma::vec Gammal, arma::vec Gammar);
 	arma::cx_mat Hs(arma::vec x);
 	void gen_Hs_pd(arma::vec x, arma::vec p, arma::mat& Hs_pd, arma::cx_mat& Us_pd);
 	void gen_Hf_pd(arma::vec x, arma::vec p, arma::mat& Hf_pd, arma::cx_mat& Uf_pd);
