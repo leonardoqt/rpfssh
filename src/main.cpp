@@ -25,7 +25,7 @@ int main()
 	double gamma = 0.003, Temp = 0.03, omega = 0.003, gap = 0.03, de = 0.03, w = 0.1;
 	//
 	double ek0 = 1e-3, ek1 = 1e-1;
-	int nek = 60, state = 0, sample = 10000;
+	int nek = 60, state = 1, sample = 10000;
 	double dt = 1.0, Tmax = 100000;
 	//
 	if ( rank == 0 )
@@ -48,10 +48,10 @@ int main()
 	electronic EE;
 	counter time_evo;
 	//
-	double mass = 1000.0;
+	double mass = 2000.0;
 	double beta = 1/Temp;
-	double xstart = 0.0;
-	double xend = 20.0;
+	double xstart = -6.0;
+	double xend = 7.0;
 	//double sigma_x = 0.5;
 	//
 	int sample_myself;
