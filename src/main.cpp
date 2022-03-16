@@ -25,7 +25,7 @@ int main()
 	double gamma = 0.003, Temp = 0.03, omega = 0.003, gap = 0.03, de = 0.03, w = 0.1;
 	//
 	double ek0 = 1e-3, ek1 = 1e-1;
-	int nek = 60, state = 1, sample = 10000;
+	int nek = 60, state = 0, sample = 10000;
 	double dt = 1.0, Tmax = 100000;
 	//
 	if ( rank == 0 )
@@ -60,7 +60,7 @@ int main()
 	vec vv = linspace(sqrt(2*ek0/mass),sqrt(2*ek1/mass),nek);
 	vec counter_t(HH.sz_f,fill::zeros), counter_r(HH.sz_f,fill::zeros);
 	mat rho0(HH.sz_f,HH.sz_f,fill::zeros);
-	rho0(1,1) = 1;
+	rho0(state,state) = 1;
 	//
 	sample_myself = sample / size;
 	//
