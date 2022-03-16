@@ -16,7 +16,7 @@ void ionic::init(double Mass, vec X, vec P, int state, double Dt, int Period, do
 	nhops = 0;
 }
 
-void ionic::move(potential& HH)
+void ionic::move(potential& HH,double tem)
 {
 	// Sympletic integrator for separable Hamiltonian, i.e. grad U_pd is a constant
 	// See https://en.wikipedia.org/wiki/Symplectic_integrator#:~:text=In%20concrete
@@ -38,6 +38,11 @@ void ionic::move(potential& HH)
 	HH.dyn_Hf_pd(x,p,dHdx,dHdp);
 	HH.ionic(x,Eion,dEiondx);
 	p = p - (dt/2)*(dHdx.col(istate)+dEiondx);
+	//
+	// rand in both x and y direction
+	double lambda = 0.1;
+	vec rnd(2,fill::randu);
+	p = p - lambda*dHdp.col(istate)*dt + (2*rnd-1)*sqrt(6*lambda*tem/dt)*dt;
 	//
 	ek = dot(p,p)/2/mass;
 }

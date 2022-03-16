@@ -18,7 +18,7 @@ public:
 	double xendl, xendr;
 	//
 	void init(double Mass, arma::vec X, arma::vec P, int state, double Dt, int Period, double Xendl, double Xendr);
-	void move(potential& HH);
+	void move(potential& HH, double tem);
 	void try_hop(potential& HH, arma::cx_mat rho, arma::mat hop_bath);
 	//int check_stop();
 };

@@ -35,17 +35,13 @@ void potential::init_H(double Omega, double Gap, double De, double W, double Mas
 
 cx_mat potential::Hs(vec x)
 {
-	double A = 0.01, B = 1.6, C = 0.005, D = 1;
 	cx_mat HH(sz_s,sz_s,fill::zeros);
 	if(if_test)
 	{
-		//HH(0,0) = cx_double(b*x(0)   , 0);
-		if (x(0)>0)
-			HH(0,0) = cx_double(A*(1-exp(-B*x(0))),0);
-		else
-			HH(0,0) = cx_double(-A*(1-exp(B*x(0))),0);
-		HH(1,1) = -HH(0,0);
-		HH(0,1) = HH(1,0)= cx_double(C*exp(-D*x(0)*x(0)));
+		HH(0,0) = cx_double(b*x(0)+de, 0);
+		HH(1,1) = cx_double(-b*x(0)+de, 0);
+		HH(0,1) = cx_double(cos(w*x(1)), sin(w*x(1)) ) * (1.5*gap*exp(-0.1*x(0)*x(0)));
+		HH(1,0) = cx_double(cos(w*x(1)),-sin(w*x(1)) ) * (1.5*gap*exp(-0.1*x(0)*x(0)));
 		return HH;
 	}
 	else
@@ -98,8 +94,8 @@ void potential::ionic(vec x, double& Eion, vec& dEdx)
 {
 	if (if_test)
 	{
-		Eion = 0.0;
-		dEdx = 0.0*x;
+		Eion = omega*dot(x,x);
+		dEdx = 2*omega*x;
 	}
 	else
 	{
