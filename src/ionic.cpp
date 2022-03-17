@@ -26,24 +26,24 @@ void ionic::move(potential& HH)
 	mat dHdx, dHdp;
 	vec dEiondx;
 	double Eion;
+	vec rnd;
 	//
 	x_t2 = x_t1; x_t1 = x;
 	p_t2 = p_t1; p_t1 = p;
 	//
+	rnd = vec(2,fill::randu);
 	HH.dyn_Hf_pd(x,p,dHdx,dHdp);
 	HH.ionic(x,Eion,dEiondx);
-	p = p - (dt/2)*(dHdx.col(istate)+dEiondx);
+	// rand in both x and y direction
+	p = p - (dt/2)*(dHdx.col(istate)+dEiondx) - lambda*dHdp.col(istate)*(dt/2) + (2*rnd-1)*sqrt(12*lambda*tem/dt)*(dt/2);
 	//
 	HH.dyn_Hf_pd(x,p,dHdx,dHdp);
 	x = x + dHdp.col(istate) * dt;
 	//
+	rnd = vec(2,fill::randu);
 	HH.dyn_Hf_pd(x,p,dHdx,dHdp);
 	HH.ionic(x,Eion,dEiondx);
-	p = p - (dt/2)*(dHdx.col(istate)+dEiondx);
-	//
-	// rand in both x and y direction
-	vec rnd(2,fill::randu);
-	p = p - lambda*dHdp.col(istate)*dt + (2*rnd-1)*sqrt(6*lambda*tem/dt)*dt;
+	p = p - (dt/2)*(dHdx.col(istate)+dEiondx) - lambda*dHdp.col(istate)*(dt/2) + (2*rnd-1)*sqrt(12*lambda*tem/dt)*(dt/2);
 	//
 	ek = dot(p,p)/2/mass;
 }
