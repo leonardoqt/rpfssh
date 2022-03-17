@@ -74,13 +74,15 @@ int main()
 	double t_eion;
 	vec t_eele,tmpv1,tmpv2;
 	mat tmpm1;
+	cout.precision(10);
+	cout.setf(ios::fixed);
 	for(auto m1:t_xx)
 	{
 		t_x(0) = m1;
 		HH.ionic(t_x,t_eion,tmpv1);
 		HH.E_Hf_pd(t_x,t_p,t_eele,tmpm1,tmpv1,tmpv2);
-		cout<<m1;
-		(t_eele+t_eion).t().print();
+		cout<<m1<<' ';
+		(t_eele+t_eion).t().raw_print();
 	}
 	//-----------
 	for (int iv = 0; iv<nek; iv++)
