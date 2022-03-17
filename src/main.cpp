@@ -22,20 +22,21 @@ int main()
 	MPI_Comm_size(MPI_COMM_WORLD,&size);
 	arma_rng::set_seed(now.time_since_epoch().count()+rank*10);
 	//
-	double gamma = 0.003, Temp = 0.03, omega = 0.003, gap = 0.03, de = 0.03, w = 0.1;
+	double gamma = 0.003, Temp = 0.03, lambda = 0.1, omega = 0.003, gap = 0.03, de = 0.03, w = 0.1;
 	//
 	double ek0 = 1e-3, ek1 = 1e-1;
 	int nek = 60, state = 1, sample = 10000;
 	double dt = 1.0, Tmax = 100000;
 	//
 	if ( rank == 0 )
-		cin>>omega>>gap>>de>>w>>gamma>>Temp>>ek0>>ek1>>nek>>sample>>dt>>Tmax;
+		cin>>omega>>gap>>de>>w>>gamma>>Temp>>lambda>>ek0>>ek1>>nek>>sample>>dt>>Tmax;
 	MPI_Bcast(&omega  ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&gap    ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&de     ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&w      ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&gamma  ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&Temp   ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+	MPI_Bcast(&lambda ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&ek0    ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&ek1    ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&nek    ,1,MPI_INT,0,MPI_COMM_WORLD);
@@ -48,7 +49,7 @@ int main()
 	electronic EE;
 	counter time_evo;
 	//
-	double mass = 2000.0;
+	double mass = 1000.0;
 	double beta = 1/Temp;
 	double xstart = -6.0;
 	double xend = 7.0;
@@ -96,13 +97,13 @@ int main()
 			//AA.init(HH,mass,vv(iv)+randn()*(0.5/sigma_x)/mass,xstart+randn()*sigma_x,state,-xend,xend);
 			x0(0) = xstart;
 			p0(0) = vv(iv)*mass;
-			AA.init(mass,x0,p0,state,dt,2,-xend,xend);
+			AA.init(mass,Temp,lambda,x0,p0,state,dt,2,-xend,xend);
 			EE.init(rho0,HH,beta,2*dt);
 			// run fssh
 			for(int iter = 0; iter*EE.dt < Tmax; iter++)
 			{
-				AA.move(HH,Temp);
-				AA.move(HH,Temp);
+				AA.move(HH);
+				AA.move(HH);
 				EE.evolve(HH,AA.x_t2,AA.x_t1,AA.x,AA.p_t2,AA.p_t1,AA.p);
 				//EE.try_decoherence(AA);
 				AA.try_hop(HH,EE.rho,EE.hop_bath);

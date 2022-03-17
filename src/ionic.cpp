@@ -2,11 +2,13 @@
 
 using namespace arma;
 
-void ionic::init(double Mass, vec X, vec P, int state, double Dt, int Period, double Xendl, double Xendr)
+void ionic::init(double Mass, double Tem, double Lambda, vec X, vec P, int state, double Dt, int Period, double Xendl, double Xendr)
 {
 	dt = Dt;
 	hop_period = Period;
 	mass = Mass;
+	tem = Tem;
+	lambda = Lambda;
 	x_t2 = x_t1 = x = X;
 	p_t2 = p_t1 = p = P;
 	ek = dot(p,p)/2/mass;
@@ -16,7 +18,7 @@ void ionic::init(double Mass, vec X, vec P, int state, double Dt, int Period, do
 	nhops = 0;
 }
 
-void ionic::move(potential& HH,double tem)
+void ionic::move(potential& HH)
 {
 	// Sympletic integrator for separable Hamiltonian, i.e. grad U_pd is a constant
 	// See https://en.wikipedia.org/wiki/Symplectic_integrator#:~:text=In%20concrete
@@ -40,7 +42,6 @@ void ionic::move(potential& HH,double tem)
 	p = p - (dt/2)*(dHdx.col(istate)+dEiondx);
 	//
 	// rand in both x and y direction
-	double lambda = 0.1;
 	vec rnd(2,fill::randu);
 	p = p - lambda*dHdp.col(istate)*dt + (2*rnd-1)*sqrt(6*lambda*tem/dt)*dt;
 	//
