@@ -101,7 +101,7 @@ void ionic::try_hop(potential &HH, arma::cx_mat rho, arma::mat hop_bath)
 		if (rate_b(t1) < 0)
 			rate_b(t1) = 0;
 		// TODO: this may not be correct for general H, but for V = V(x)*e^iwy it should work
-		if ( dot(p,dp)*dot(p,dp) < 2*mass*dot(dp,dp)*(Ef(t1)-Ef(istate)) )
+		if ( dot(p,dp)*dot(p,dp) < 2*mass*dot(dp,dp)*(Ef(t1)-Ef(istate)) || dot(dp,dp) < 1e-20)
 			rate_s(t1) = 0;
 	}
 	//rate_s.t().print("rate_s");
