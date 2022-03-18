@@ -14,6 +14,7 @@ public:
 	// need to run two ionic steps then run electronic step
 	double beta, dt;
 	arma::cx_mat rho;
+	arma::mat U;
 	arma::mat hop_bath;
 	//
 	void init(arma::mat Rho0, potential& HH, double Beta, double Dt);

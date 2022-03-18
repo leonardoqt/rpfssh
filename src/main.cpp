@@ -51,8 +51,8 @@ int main()
 	//
 	double mass = 1000.0;
 	double beta = 1/Temp;
-	double xstart = -6.0;
-	double xend = 7.0;
+	double xstart = 0.0;
+	double xend = 20.0;
 	//double sigma_x = 0.5;
 	//
 	int sample_myself;
@@ -70,21 +70,21 @@ int main()
 	gammal(0) = gammal(1) = gamma/2;
 	HH.init_H(omega,gap,de,w,mass,0,0,gammal,gammal*0);
 	//-----------
-	vec t_xx = linspace(-20,20,1000);
-	vec t_x(2,fill::zeros), t_p(2,fill::zeros);
-	double t_eion;
-	vec t_eele,tmpv1,tmpv2;
-	mat tmpm1;
-	cout.precision(10);
-	cout.setf(ios::fixed);
-	for(auto m1:t_xx)
-	{
-		t_x(0) = m1;
-		HH.ionic(t_x,t_eion,tmpv1);
-		HH.E_Hf_pd(t_x,t_p,t_eele,tmpm1,tmpv1,tmpv2);
-		cout<<m1<<' ';
-		(t_eele+t_eion).t().raw_print();
-	}
+	//vec t_xx = linspace(-20,20,1000);
+	//vec t_x(2,fill::zeros), t_p(2,fill::zeros);
+	//double t_eion;
+	//vec t_eele,tmpv1,tmpv2;
+	//mat tmpm1;
+	//cout.precision(10);
+	//cout.setf(ios::fixed);
+	//for(auto m1:t_xx)
+	//{
+	//	t_x(0) = m1;
+	//	HH.ionic(t_x,t_eion,tmpv1);
+	//	HH.E_Hf_pd(t_x,t_p,t_eele,tmpm1,tmpv1,tmpv2);
+	//	cout<<m1<<' ';
+	//	(t_eele+t_eion).t().raw_print();
+	//}
 	//-----------
 	for (int iv = 0; iv<nek; iv++)
 	{
@@ -107,7 +107,7 @@ int main()
 				EE.evolve(HH,AA.x_t2,AA.x_t1,AA.x,AA.p_t2,AA.p_t1,AA.p);
 				//EE.try_decoherence(AA);
 				AA.try_hop(HH,EE.rho,EE.hop_bath);
-				time_evo.add(iter,AA.ek,AA.etot,AA.istate,AA.nhops);
+				time_evo.add(iter,AA.ek,AA.etot,AA.istate,AA.nhops,EE.U,EE.rho);
 				//cout<<iter*time_evo.dt<<'\t'<<abs(EE.rho_fock(0,0))<<'\t'<<abs(EE.rho_fock(1,1))<<endl;
 			}
 			// count rate
@@ -130,7 +130,10 @@ int main()
 		MPI_Allreduce(time_evo.ek,time_evo.ek_all,time_evo.nbin,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
 		MPI_Allreduce(time_evo.et,time_evo.et_all,time_evo.nbin,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
 		for(int t1=0; t1<time_evo.sz_f; t1++)
+		{
 			MPI_Allreduce(time_evo.pp[t1],time_evo.pp_all[t1],time_evo.nbin,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+			MPI_Allreduce(time_evo.ppd[t1],time_evo.ppd_all[t1],time_evo.nbin,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+		}
 		MPI_Allreduce(time_evo.hop,time_evo.hop_all,time_evo.nbin,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
 		MPI_Allreduce(time_evo.count,time_evo.count_all,time_evo.nbin,MPI_INT,MPI_SUM,MPI_COMM_WORLD);
 		// print
@@ -145,6 +148,10 @@ int main()
 			//
 			ff.open("traj_v-"+to_string(iv)+".dat");
 			time_evo.print_pop(ff);
+			ff.close();
+			//
+			ff.open("dtraj_v-"+to_string(iv)+".dat");
+			time_evo.print_popd(ff);
 			ff.close();
 			//
 			cout<<vv(iv)*vv(iv)*mass/2;

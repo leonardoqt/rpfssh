@@ -48,6 +48,7 @@ void electronic::evolve(potential &HH, vec x_t2, vec x_t1, vec x_t0, vec p_t2, v
 	// save last xp for next RK4
 	x_last = x_t1;
 	p_last = p_t1;
+	U = U_t0;
 }
 
 cx_mat electronic::rho_dot(potential& HH, vec E0, cx_mat Dvt, vec Gl, vec Gr, cx_mat rho0)
