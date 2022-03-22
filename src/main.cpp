@@ -97,14 +97,13 @@ int main()
 			//AA.init(HH,mass,vv(iv)+randn()*(0.5/sigma_x)/mass,xstart+randn()*sigma_x,state,-xend,xend);
 			x0(0) = xstart;
 			p0(0) = vv(iv)*mass;
-			AA.init(mass,Temp,lambda,x0,p0,state,dt,2,-xend,xend);
+			AA.init(mass,Temp,lambda,x0,p0,state,dt,-xend,xend);
 			EE.init(rho0,HH,beta,2*dt);
 			// run fssh
 			for(int iter = 0; iter*EE.dt < Tmax; iter++)
 			{
 				AA.move(HH);
-				AA.move(HH);
-				EE.evolve(HH,AA.x_t2,AA.x_t1,AA.x,AA.p_t2,AA.p_t1,AA.p);
+				EE.evolve(HH,AA.x_t1,AA.x,AA.p_t1,AA.p);
 				//EE.try_decoherence(AA);
 				AA.try_hop(HH,EE.rho,EE.hop_bath);
 				time_evo.add(iter,AA.ek,AA.etot,AA.istate,AA.nhops,EE.U,EE.rho);

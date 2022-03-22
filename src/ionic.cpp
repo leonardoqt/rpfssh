@@ -2,15 +2,14 @@
 
 using namespace arma;
 
-void ionic::init(double Mass, double Tem, double Lambda, vec X, vec P, int state, double Dt, int Period, double Xendl, double Xendr)
+void ionic::init(double Mass, double Tem, double Lambda, vec X, vec P, int state, double Dt, double Xendl, double Xendr)
 {
 	dt = Dt;
-	hop_period = Period;
 	mass = Mass;
 	tem = Tem;
 	lambda = Lambda;
-	x_t2 = x_t1 = x = X;
-	p_t2 = p_t1 = p = P;
+	x_t1 = x = X;
+	p_t1 = p = P;
 	ek = dot(p,p)/2/mass;
 	istate = state;
 	xendl = Xendl;
@@ -28,14 +27,14 @@ void ionic::move(potential& HH)
 	double Eion;
 	vec rnd;
 	//
-	x_t2 = x_t1; x_t1 = x;
-	p_t2 = p_t1; p_t1 = p;
+	x_t1 = x;
+	p_t1 = p;
 	//
 	rnd = vec(2,fill::randu);
 	HH.dyn_Hf_pd(x,p,dHdx,dHdp);
 	HH.ionic(x,Eion,dEiondx);
 	// rand in both x and y direction
-	p = p - (dt/2)*(dHdx.col(istate)+dEiondx) - lambda*dHdp.col(istate)*(dt/2) + (2*rnd-1)*sqrt(12*lambda*tem/dt)*(dt/2);
+	p = p - (dt/2)*(dHdx.col(istate)+dEiondx);// - lambda*dHdp.col(istate)*(dt/2) + (2*rnd-1)*sqrt(12*lambda*tem/dt)*(dt/2);
 	//
 	HH.dyn_Hf_pd(x,p,dHdx,dHdp);
 	x = x + dHdp.col(istate) * dt;
@@ -43,14 +42,14 @@ void ionic::move(potential& HH)
 	rnd = vec(2,fill::randu);
 	HH.dyn_Hf_pd(x,p,dHdx,dHdp);
 	HH.ionic(x,Eion,dEiondx);
-	p = p - (dt/2)*(dHdx.col(istate)+dEiondx) - lambda*dHdp.col(istate)*(dt/2) + (2*rnd-1)*sqrt(12*lambda*tem/dt)*(dt/2);
+	p = p - (dt/2)*(dHdx.col(istate)+dEiondx) - lambda*dHdp.col(istate)*(dt) + (2*rnd-1)*sqrt(6*lambda*tem/dt)*(dt);
 	//
 	ek = dot(p,p)/2/mass;
 }
 
 void ionic::try_hop(potential &HH, arma::cx_mat rho, arma::mat hop_bath)
 {
-	cx_mat T = HH.ddt_f(x_t2,x,p_t2,p);
+	cx_mat T = HH.ddt_f(x_t1,x,p_t1,p);
 	vec rate_s(HH.sz_f), rate_b(HH.sz_f);
 	//
 	// TODO: rethink about this part
@@ -94,7 +93,7 @@ void ionic::try_hop(potential &HH, arma::cx_mat rho, arma::mat hop_bath)
 		{
 			rate_s(t1) = real( T(istate,t1)*rho(t1,istate) ) * 2 / real(rho(istate,istate));
 			//rate_b(t1) = ( hop_bath(t1,istate)*real(rho(istate,istate))-hop_bath(istate,t1)*real(rho(t1,t1)) )/real(rho(istate,istate)) * dt*hop_period;
-			rate_b(t1) = hop_bath(t1,istate) * dt*hop_period;
+			rate_b(t1) = hop_bath(t1,istate) * dt;
 		}
 		if (rate_s(t1) < 0)
 			rate_s(t1) = 0;
