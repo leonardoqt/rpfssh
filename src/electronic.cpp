@@ -90,36 +90,34 @@ cx_mat electronic::Lrho(potential& HH, vec E0, vec Gl, vec Gr, cx_mat rho0)
 	fl = 1 / ( 1 + exp(beta*(E0.rows(1,sz_s)-E0(0)-HH.mul)) );
 	fr = 1 / ( 1 + exp(beta*(E0.rows(1,sz_s)-E0(0)-HH.mur)) );
 	//
-	cube LL(sz_f,sz_f,8);
-	LL(1,0,0) = LL(3,2,1) = LL(0,1,2) = LL(2,3,3) = 1;
-	LL(2,0,4) = LL(3,1,5) = LL(0,2,6) = LL(1,3,7) = 1;
+	//cube LL(sz_f,sz_f,8);
+	//LL(1,0,0) = LL(3,2,1) = LL(0,1,2) = LL(2,3,3) = 1;
+	//LL(2,0,4) = LL(3,1,5) = LL(0,2,6) = LL(1,3,7) = 1;
 	//
 	cx_mat res(sz_f,sz_f,fill::zeros);
-	mat L;
 	//
-	L = LL.slice(0);
-	res += (Gl(0)*fl(0)+Gr(0)*fr(0)) * ( L*rho0*L.t() - (L.t()*L*rho0+rho0*L.t()*L)/2 );
-	L = LL.slice(1);
-	res += (Gl(0)*fl(0)+Gr(0)*fr(0)) * ( L*rho0*L.t() - (L.t()*L*rho0+rho0*L.t()*L)/2 );
-	L = LL.slice(2);
-	res += (Gl(0)*(1-fl(0))+Gr(0)*(1-fr(0))) * ( L*rho0*L.t() - (L.t()*L*rho0+rho0*L.t()*L)/2 );
-	L = LL.slice(3);
-	res += (Gl(0)*(1-fl(0))+Gr(0)*(1-fr(0))) * ( L*rho0*L.t() - (L.t()*L*rho0+rho0*L.t()*L)/2 );
+	Lrho_ij(res,rho0,1,0,Gl(0)*fl(0)+Gr(0)*fr(0));
+	Lrho_ij(res,rho0,3,2,Gl(0)*fl(0)+Gr(0)*fr(0));
+	Lrho_ij(res,rho0,0,1,Gl(0)*(1-fl(0))+Gr(0)*(1-fr(0)));
+	Lrho_ij(res,rho0,2,3,Gl(0)*(1-fl(0))+Gr(0)*(1-fr(0)));
 	//
-	L = LL.slice(4);
-	res += (Gl(1)*fl(1)+Gr(1)*fr(1)) * ( L*rho0*L.t() - (L.t()*L*rho0+rho0*L.t()*L)/2 );
-	L = LL.slice(5);
-	res += (Gl(1)*fl(1)+Gr(1)*fr(1)) * ( L*rho0*L.t() - (L.t()*L*rho0+rho0*L.t()*L)/2 );
-	L = LL.slice(6);
-	res += (Gl(1)*(1-fl(1))+Gr(1)*(1-fr(1))) * ( L*rho0*L.t() - (L.t()*L*rho0+rho0*L.t()*L)/2 );
-	L = LL.slice(7);
-	res += (Gl(1)*(1-fl(1))+Gr(1)*(1-fr(1))) * ( L*rho0*L.t() - (L.t()*L*rho0+rho0*L.t()*L)/2 );
+	Lrho_ij(res,rho0,2,0,Gl(1)*fl(1)+Gr(1)*fr(1));
+	Lrho_ij(res,rho0,3,1,Gl(1)*fl(1)+Gr(1)*fr(1));
+	Lrho_ij(res,rho0,0,2,Gl(1)*(1-fl(1))+Gr(1)*(1-fr(1)));
+	Lrho_ij(res,rho0,1,3,Gl(1)*(1-fl(1))+Gr(1)*(1-fr(1)));
 	//
 	hop_bath(1,0) = hop_bath(3,2) = Gl(0)*fl(0)+Gr(0)*fr(0);
 	hop_bath(2,0) = hop_bath(3,1) = Gl(1)*fl(1)+Gr(1)*fr(1);
 	hop_bath(0,1) = hop_bath(2,3) = Gl(0)*(1-fl(0))+Gr(0)*(1-fr(0));
 	hop_bath(0,2) = hop_bath(1,3) = Gl(1)*(1-fl(1))+Gr(1)*(1-fr(1));
 	return res;
+}
+
+void electronic::Lrho_ij(cx_mat& res, cx_mat& rho0, int i, int j, double coef)
+{
+	res(i,i) += coef*rho0(j,j);
+	res.row(j) -= coef/2*rho0.row(j);
+	res.col(j) -= coef/2*rho0.col(j);
 }
 //void electronic::try_decoherence(ionic& AA)
 //{

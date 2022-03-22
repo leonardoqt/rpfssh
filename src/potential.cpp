@@ -39,9 +39,9 @@ cx_mat potential::Hs(vec x)
 	if(if_test)
 	{
 		HH(0,0) = cx_double(b*x(0), 0);
-		HH(1,1) = cx_double(-b*x(0), 0);
-		HH(0,1) = cx_double(cos(w*x(1)), sin(w*x(1)) ) * (de*exp(-0.3*x(0)*x(0)));
-		HH(1,0) = cx_double(cos(w*x(1)),-sin(w*x(1)) ) * (de*exp(-0.3*x(0)*x(0)));
+		HH(1,1) = cx_double(0, 0);
+		HH(0,1) = cx_double(cos(w*x(1)), sin(w*x(1)) ) * (de*exp(-0.0*x(0)*x(0)));
+		HH(1,0) = cx_double(cos(w*x(1)),-sin(w*x(1)) ) * (de*exp(-0.0*x(0)*x(0)));
 		return HH;
 	}
 	else
