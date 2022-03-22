@@ -88,7 +88,7 @@ int main()
 	//-----------
 	for (int iv = 0; iv<nek; iv++)
 	{
-		time_evo.init(HH.sz_f,2*dt,Tmax);
+		time_evo.init(HH.sz_f,dt,Tmax);
 		counter_t = counter_t*0;
 		counter_r = counter_r*0;
 		for (int isample=0; isample<sample_myself;isample++)
@@ -98,7 +98,7 @@ int main()
 			x0(0) = xstart;
 			p0(0) = vv(iv)*mass;
 			AA.init(mass,Temp,lambda,x0,p0,state,dt,-xend,xend);
-			EE.init(rho0,HH,beta,2*dt);
+			EE.init(rho0,HH,beta,dt);
 			// run fssh
 			for(int iter = 0; iter*EE.dt < Tmax; iter++)
 			{
