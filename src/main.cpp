@@ -57,6 +57,8 @@ int main()
 	//
 	int sample_myself;
 	double tmp,tmp2;
+	double *x_final, *p_final;
+	double *x_final_all, *p_final_all;
 	//
 	vec vv = linspace(sqrt(2*ek0/mass),sqrt(2*ek1/mass),nek);
 	vec counter_t(HH.sz_f,fill::zeros), counter_r(HH.sz_f,fill::zeros);
@@ -64,6 +66,10 @@ int main()
 	rho0(state,state) = 1;
 	//
 	sample_myself = sample / size;
+	x_final = new double[sample_myself];
+	p_final = new double[sample_myself];
+	x_final_all = new double[sample_myself*size];
+	p_final_all = new double[sample_myself*size];
 	//
 	vec x0(2,fill::zeros), p0(2,fill::zeros);
 	vec gammal(2,fill::zeros);
@@ -109,6 +115,8 @@ int main()
 				time_evo.add(iter,AA.ek,AA.etot,AA.istate,AA.nhops,EE.U,EE.rho);
 				//cout<<iter*time_evo.dt<<'\t'<<abs(EE.rho_fock(0,0))<<'\t'<<abs(EE.rho_fock(1,1))<<endl;
 			}
+			x_final[isample] = AA.x(0);
+			p_final[isample] = AA.p(0);
 			// count rate
 			if (AA.x(0) < 0)
 				counter_r(AA.istate) += 1.0;
@@ -125,6 +133,8 @@ int main()
 			MPI_Allreduce(&tmp,&tmp2,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
 			counter_r(t1) = tmp2;
 		}
+		MPI_Gather(x_final,sample_myself,MPI_DOUBLE,x_final_all,sample_myself,MPI_DOUBLE,0,MPI_COMM_WORLD);
+		MPI_Gather(p_final,sample_myself,MPI_DOUBLE,p_final_all,sample_myself,MPI_DOUBLE,0,MPI_COMM_WORLD);
 		//
 		MPI_Allreduce(time_evo.ek,time_evo.ek_all,time_evo.nbin,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
 		MPI_Allreduce(time_evo.et,time_evo.et_all,time_evo.nbin,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
@@ -152,6 +162,15 @@ int main()
 			ff.open("dtraj_v-"+to_string(iv)+".dat");
 			time_evo.print_popd(ff);
 			ff.close();
+			//
+			ff.open("xx_v-"+to_string(iv)+".dat");
+			for(int t1=0; t1<sample_myself*size; t1++)
+				ff<<x_final_all[t1]<<endl;
+			ff.close();
+			//
+			ff.open("px_v-"+to_string(iv)+".dat");
+			for(int t1=0; t1<sample_myself*size; t1++)
+				ff<<p_final_all[t1]<<endl;
 			//
 			cout<<vv(iv)*vv(iv)*mass/2;
 			for (int t1=0; t1<HH.sz_f; t1++)
