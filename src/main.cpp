@@ -57,8 +57,8 @@ int main()
 	//
 	int sample_myself;
 	double tmp,tmp2;
-	double *x_final, *p_final;
-	double *x_final_all, *p_final_all;
+	double *x_final, *p_final, **p_finaln;
+	double *x_final_all, *p_final_all, **p_finaln_all;
 	//
 	vec vv = linspace(sqrt(2*ek0/mass),sqrt(2*ek1/mass),nek);
 	vec counter_t(HH.sz_f,fill::zeros), counter_r(HH.sz_f,fill::zeros);
@@ -70,6 +70,15 @@ int main()
 	p_final = new double[sample_myself];
 	x_final_all = new double[sample_myself*size];
 	p_final_all = new double[sample_myself*size];
+	p_finaln = new double*[4];
+	p_finaln_all = new double*[4];
+	for(int t1=0; t1<4; t1++)
+	{
+		p_finaln[t1] = new double[sample_myself];
+		p_finaln_all[t1] = new double[sample_myself*size];
+		for(int t2=0; t2<sample_myself; t2++)
+			p_finaln[t1][t2] = 1e100;
+	}
 	//
 	vec x0(2,fill::zeros), p0(2,fill::zeros);
 	vec gammal(2,fill::zeros);
@@ -117,6 +126,7 @@ int main()
 			}
 			x_final[isample] = AA.x(0);
 			p_final[isample] = AA.p(0);
+			p_finaln[AA.istate][isample] = AA.p(0);
 			// count rate
 			if (AA.x(0) < 0)
 				counter_r(AA.istate) += 1.0;
@@ -135,6 +145,10 @@ int main()
 		}
 		MPI_Gather(x_final,sample_myself,MPI_DOUBLE,x_final_all,sample_myself,MPI_DOUBLE,0,MPI_COMM_WORLD);
 		MPI_Gather(p_final,sample_myself,MPI_DOUBLE,p_final_all,sample_myself,MPI_DOUBLE,0,MPI_COMM_WORLD);
+		MPI_Gather(p_finaln[0],sample_myself,MPI_DOUBLE,p_finaln_all[0],sample_myself,MPI_DOUBLE,0,MPI_COMM_WORLD);
+		MPI_Gather(p_finaln[1],sample_myself,MPI_DOUBLE,p_finaln_all[1],sample_myself,MPI_DOUBLE,0,MPI_COMM_WORLD);
+		MPI_Gather(p_finaln[2],sample_myself,MPI_DOUBLE,p_finaln_all[2],sample_myself,MPI_DOUBLE,0,MPI_COMM_WORLD);
+		MPI_Gather(p_finaln[3],sample_myself,MPI_DOUBLE,p_finaln_all[3],sample_myself,MPI_DOUBLE,0,MPI_COMM_WORLD);
 		//
 		MPI_Allreduce(time_evo.ek,time_evo.ek_all,time_evo.nbin,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
 		MPI_Allreduce(time_evo.et,time_evo.et_all,time_evo.nbin,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
@@ -171,6 +185,31 @@ int main()
 			ff.open("px_v-"+to_string(iv)+".dat");
 			for(int t1=0; t1<sample_myself*size; t1++)
 				ff<<p_final_all[t1]<<endl;
+			ff.close();
+			//
+			ff.open("npx0_v-"+to_string(iv)+".dat");
+			for(int t1=0; t1<sample_myself*size; t1++)
+				if(p_finaln_all[0][t1] < 1e99)
+					ff<<p_finaln_all[0][t1]<<endl;
+			ff.close();
+			//
+			ff.open("npx1_v-"+to_string(iv)+".dat");
+			for(int t1=0; t1<sample_myself*size; t1++)
+				if(p_finaln_all[1][t1] < 1e99)
+					ff<<p_finaln_all[1][t1]<<endl;
+			ff.close();
+			//
+			ff.open("npx2_v-"+to_string(iv)+".dat");
+			for(int t1=0; t1<sample_myself*size; t1++)
+				if(p_finaln_all[2][t1] < 1e99)
+					ff<<p_finaln_all[2][t1]<<endl;
+			ff.close();
+			//
+			ff.open("npx3_v-"+to_string(iv)+".dat");
+			for(int t1=0; t1<sample_myself*size; t1++)
+				if(p_finaln_all[3][t1] < 1e99)
+					ff<<p_finaln_all[3][t1]<<endl;
+			ff.close();
 			//
 			cout<<vv(iv)*vv(iv)*mass/2;
 			for (int t1=0; t1<HH.sz_f; t1++)
