@@ -22,25 +22,26 @@ int main()
 	MPI_Comm_size(MPI_COMM_WORLD,&size);
 	arma_rng::set_seed(now.time_since_epoch().count()+rank*10);
 	//
-	double gamma = 0.003, Temp = 0.03, lambda = 0.1, omega = 0.003, gap = 0.03, de = 0.03, w = 0.1;
+	double gamma = 0.003, Temp = 0.03, lambda = 0.1, omega = 0.003, gap = 0.03, mur = 0.03, de = 0.03, w = 0.1;
 	//
 	double ek0 = 1e-3, ek1 = 1e-1;
 	int nek = 60, state = 1, sample = 10000;
 	double dt = 1.0, Tmax = 100000;
 	//
 	if ( rank == 0 )
-		cin>>omega>>gap>>de>>w>>gamma>>Temp>>lambda>>ek0>>ek1>>nek>>sample>>dt>>Tmax;
+		cin>>omega>>gap>>de>>w>>gamma>>mur>>Temp>>lambda>>ek0>>ek1>>nek>>sample>>dt>>Tmax;
 	MPI_Bcast(&omega  ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&gap    ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&de     ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&w      ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&gamma  ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+	MPI_Bcast(&mur    ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&Temp   ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&lambda ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&ek0    ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&ek1    ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
-	MPI_Bcast(&nek    ,1,MPI_INT,0,MPI_COMM_WORLD);
-	MPI_Bcast(&sample ,1,MPI_INT,0,MPI_COMM_WORLD);
+	MPI_Bcast(&nek    ,1,MPI_INT   ,0,MPI_COMM_WORLD);
+	MPI_Bcast(&sample ,1,MPI_INT   ,0,MPI_COMM_WORLD);
 	MPI_Bcast(&dt     ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&Tmax   ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	//====================
@@ -82,8 +83,8 @@ int main()
 	//
 	vec x0(2,fill::zeros), p0(2,fill::zeros);
 	vec gammal(2,fill::zeros);
-	gammal(0) = gammal(1) = gamma/2;
-	HH.init_H(omega,gap,de,w,mass,0,0,gammal,gammal*0);
+	gammal(0) = gammal(1) = gamma/4;
+	HH.init_H(omega,gap,de,w,mass,0,mur,gammal,gammal);
 	//-----------
 	//vec t_xx = linspace(-20,20,1000);
 	//vec t_x(2,fill::zeros), t_p(2,fill::zeros);
