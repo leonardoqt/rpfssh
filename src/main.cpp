@@ -83,8 +83,10 @@ int main()
 	//
 	vec x0(2,fill::zeros), p0(2,fill::zeros);
 	vec gammal(2,fill::zeros);
-	gammal(0) = gammal(1) = gamma/4;
-	HH.init_H(omega,gap,de,w,mass,0,mur,gammal,gammal);
+	vec gammar(2,fill::zeros);
+	gammal(0) = gamma/2;
+	gammar(1) = gamma/2;
+	HH.init_H(omega,gap,de,w,mass,0,mur,gammal,gammar);
 	//-----------
 	//vec t_xx = linspace(-20,20,1000);
 	//vec t_x(2,fill::zeros), t_p(2,fill::zeros);
