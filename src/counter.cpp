@@ -40,7 +40,7 @@ void counter::init(int Sz, double Dt, double Tmax)
 	}
 }
 
-void counter::add(int niter, double eki, double eti, int istate, int hopi, mat U, cx_mat rho)
+void counter::add(int niter, double eki, double eti, int istate, int hopi, cx_mat U, cx_mat rho)
 {
 	ek[niter] += eki;
 	et[niter] += eti;
@@ -51,6 +51,7 @@ void counter::add(int niter, double eki, double eti, int istate, int hopi, mat U
 	cx_mat rho_d = U*rho*U.t();
 	for(int t1=0; t1<sz_f; t1++)
 	{
+		// TODO: take a close look at this expression
 		ppd[t1][niter] += real( rho_d(t1,t1) - dot(square(U.row(t1).t()),rho.diag()) );
 		ppd[t1][niter] += real( U(t1,istate)*U(t1,istate) );
 	}
