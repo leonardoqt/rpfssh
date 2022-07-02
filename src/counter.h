@@ -17,7 +17,7 @@ public:
 	int *count_all;
 	//
 	void init(int Sz, double Dt, double Tmax);
-	void add(int niter, double eki, double eti, int istate, int hopi, arma::cx_mat U, arma::cx_mat rho);
+	void add(int niter, double eki, double eti, int istate, int hopi, arma::mat U, arma::cx_mat rho);
 	void average();
 	void print_ene(std::ofstream& output);
 	void print_pop(std::ofstream& output);

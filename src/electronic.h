@@ -12,7 +12,7 @@ public:
 	int sz_s, sz_f, n_dt;
 	double beta, dt;
 	arma::cx_mat rho;
-	arma::cx_mat U;
+	arma::mat U;
 	arma::mat hop_bath;
 	//
 	void init(arma::mat Rho0, potential& HH, double Beta, double Dt);

@@ -59,8 +59,7 @@ void electronic::evolve(potential &HH, vec x_t1, vec x_t0, vec p_t1, vec p_t0)
 		// try hop
 	}
 	//
-	HH.gen_Hf_pd(x_t0,p_t0,TT,U);
-	U = U * U_t0;
+	U = U_t0;
 }
 
 void electronic::gen_n_dt(mat T, vec E_adiab)
