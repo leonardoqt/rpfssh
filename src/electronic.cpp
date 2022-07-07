@@ -15,12 +15,14 @@ void electronic::init(mat Rho0, potential& HH, double Beta, double Dt)
 
 void electronic::evolve(potential &HH, vec x_t1, vec x_t0, vec p_t1, vec p_t0)
 {
-	vec E_t1, E_t0;
+	vec E_t1, E_t0, E_exp_t1, E_exp_t0;
 	mat U_t1, U_t0;
 	mat TT;
 	vec Gl_t1, Gl_t0;
 	vec Gr_t1, Gr_t0;
 	//
+	HH.E_expect_Hf_pd(x_t1,p_t1,E_exp_t1,U_t1,Gl_t1,Gr_t1);
+	HH.E_expect_Hf_pd(x_t0,p_t0,E_exp_t0,U_t0,Gl_t0,Gr_t0);
 	HH.E_Hf_pd(x_t1,p_t1,E_t1,U_t1,Gl_t1,Gr_t1);
 	HH.E_Hf_pd(x_t0,p_t0,E_t0,U_t0,Gl_t0,Gr_t0);
 	TT = real( HH.ddt_f(x_t1,x_t0,p_t1,p_t0) )/dt;
@@ -32,7 +34,7 @@ void electronic::evolve(potential &HH, vec x_t1, vec x_t0, vec p_t1, vec p_t0)
 	gen_n_dt(TT,(E_t1+E_t0)/2);
 	//
 	cx_mat k1,k2,k3,k4;
-	vec E2,E1,E0;
+	vec E2,E1,E0, E2_exp,E1_exp,E0_exp;
 	vec Gl2,Gl1,Gl0;
 	vec Gr2,Gr1,Gr0;
 	for(int t1=0; t1<n_dt; t1++)
@@ -41,6 +43,11 @@ void electronic::evolve(potential &HH, vec x_t1, vec x_t0, vec p_t1, vec p_t0)
 		E2  = (E_t0 - E_t1)/n_dt * t1 + E_t1;
 		E0  = E2 + (E_t0 - E_t1)/n_dt;
 		E1  = (E2+E0)/2;
+		//
+		E2_exp  = (E_exp_t0 - E_exp_t1)/n_dt * t1 + E_exp_t1;
+		E0_exp  = E2_exp + (E_exp_t0 - E_exp_t1)/n_dt;
+		E1_exp  = (E2_exp+E0_exp)/2;
+		//
 		Gl2 = (Gl_t0 - Gl_t1)/n_dt * t1 + Gl_t1;
 		Gl0 = Gl2 + (Gl_t0 - Gl_t1)/n_dt;
 		Gl1 = (Gl2+Gl0)/2;
@@ -50,10 +57,10 @@ void electronic::evolve(potential &HH, vec x_t1, vec x_t0, vec p_t1, vec p_t0)
 		//
 		// Use RK4
 		// rhodot = -i[H(x) rho] - [D(x) rho] + Lrho
-		k1 = rho_dot(HH,E2,TT,Gl2,Gr2,rho);
-		k2 = rho_dot(HH,E1,TT,Gl1,Gr1,rho + dt/n_dt/2*k1);
-		k3 = rho_dot(HH,E1,TT,Gl1,Gr1,rho + dt/n_dt/2*k2);
-		k4 = rho_dot(HH,E0,TT,Gl0,Gr0,rho + dt/n_dt  *k3);
+		k1 = rho_dot(HH,E2,E2_exp,TT,Gl2,Gr2,rho);
+		k2 = rho_dot(HH,E1,E1_exp,TT,Gl1,Gr1,rho + dt/n_dt/2*k1);
+		k3 = rho_dot(HH,E1,E1_exp,TT,Gl1,Gr1,rho + dt/n_dt/2*k2);
+		k4 = rho_dot(HH,E0,E0_exp,TT,Gl0,Gr0,rho + dt/n_dt  *k3);
 		rho += (k1+2*k2+2*k3+k4)*(dt/n_dt/6);
 		//
 		// try hop
@@ -72,13 +79,13 @@ void electronic::gen_n_dt(mat T, vec E_adiab)
 	//cout<<n_dt<<endl;
 }
 
-cx_mat electronic::rho_dot(potential& HH, vec E0, mat TT, vec Gl, vec Gr, cx_mat rho0)
+cx_mat electronic::rho_dot(potential& HH, vec E0, vec E_exp, mat TT, vec Gl, vec Gr, cx_mat rho0)
 {
 	cx_mat res, iHD;
 	iHD = cx_double(0,-1)*diagmat(E0) - TT;
 	res = iHD*rho0 - rho0*iHD;
 	if ( dot(Gl,Gl) + dot(Gr,Gr) > 1e-20 )
-		res += Lrho(HH,E0,Gl,Gr,rho0);
+		res += Lrho(HH,E_exp,Gl,Gr,rho0);
 	else
 		hop_bath = zeros<mat>(sz_f,sz_f);
 	return res;
