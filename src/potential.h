@@ -28,7 +28,7 @@ public:
 	void ionic(arma::vec x, double& Eion, arma::vec& dEdx);
 	void E_Hf_pd(arma::vec x, arma::vec p, arma::vec& Ef, arma::mat& Uf, arma::vec& Gammal, arma::vec& Gammar);
 	// E_expect_Hf_pd: energy expectation of only the electronic part in superadiabats
-	void E_expect_Hf_pd(arma::vec x, arma::vec p, arma::vec& Ef, arma::mat& Uf, arma::vec& Gammal, arma::vec& Gammar);
+	void E_expect_Hf_pd(arma::vec x, arma::vec p, arma::vec& Ef);
 	void dyn_Hf_pd(arma::vec x, arma::vec p, arma::mat& dHdx, arma::mat& dHdp);
 	arma::cx_mat ddt_f(arma::vec x1, arma::vec x2, arma::vec p1, arma::vec p2);
 	//

@@ -21,8 +21,8 @@ void electronic::evolve(potential &HH, vec x_t1, vec x_t0, vec p_t1, vec p_t0)
 	vec Gl_t1, Gl_t0;
 	vec Gr_t1, Gr_t0;
 	//
-	HH.E_expect_Hf_pd(x_t1,p_t1,E_exp_t1,U_t1,Gl_t1,Gr_t1);
-	HH.E_expect_Hf_pd(x_t0,p_t0,E_exp_t0,U_t0,Gl_t0,Gr_t0);
+	HH.E_expect_Hf_pd(x_t1,p_t1,E_exp_t1);
+	HH.E_expect_Hf_pd(x_t0,p_t0,E_exp_t0);
 	HH.E_Hf_pd(x_t1,p_t1,E_t1,U_t1,Gl_t1,Gr_t1);
 	HH.E_Hf_pd(x_t0,p_t0,E_t0,U_t0,Gl_t0,Gr_t0);
 	TT = real( HH.ddt_f(x_t1,x_t0,p_t1,p_t0) )/dt;

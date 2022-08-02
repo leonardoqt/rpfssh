@@ -126,26 +126,20 @@ void potential::E_Hf_pd(vec x, vec p, vec& Ef, mat& Uf, vec& Gammal, vec& Gammar
 	Gammar = square(abs(vsbr_a));
 }
 
-void potential::E_expect_Hf_pd(vec x, vec p, vec& Ef, mat& Uf, vec& Gammal, vec& Gammar)
+void potential::E_expect_Hf_pd(vec x, vec p, vec& Ef)
 {
 	vec Es;
 	mat Hs_pd, Us;
 	cx_mat Us_pd, E_exp, psi_s;
 	gen_Hs_pd(x,p,Hs_pd,Us_pd);
 	eig_sym(Es,Us,Hs_pd);
-	psi_s = Us_pd*Us;
+	//psi_s = Us_pd*Us;
+	psi_s = cx_mat(Us,zeros<mat>(sz_s,sz_s));
 	E_exp = psi_s.t()*Hs(x)*psi_s;
 	Es = real(E_exp.diag());
 	Ef = zeros<vec>(sz_f);
 	Ef.rows(1,sz_s) = Es;
 	Ef(3) = Ef(1)+Ef(2)-Ef(0);
-	Uf = eye(sz_f,sz_f);
-	Uf(span(1,sz_s),span(1,sz_s)) = Us;
-	//
-	cx_vec vsbl_a = Us.t()*Us_pd.t()*vsbl;
-	cx_vec vsbr_a = Us.t()*Us_pd.t()*vsbr;
-	Gammal = square(abs(vsbl_a));
-	Gammar = square(abs(vsbr_a));
 }
 
 void potential::dyn_Hf_pd(vec x, vec p, mat &dHdx, mat &dHdp)
