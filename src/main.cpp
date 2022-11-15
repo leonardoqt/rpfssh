@@ -52,7 +52,7 @@ int main()
 	//
 	double mass = 1000.0;
 	double beta = 1/Temp;
-	double xstart = 0.0;
+	double xstart = -sqrt(gap/omega);
 	double xend = 20.0;
 	//double sigma_x = 0.5;
 	//
@@ -114,7 +114,7 @@ int main()
 			//TODO: no rand for testing
 			//AA.init(HH,mass,vv(iv)+randn()*(0.5/sigma_x)/mass,xstart+randn()*sigma_x,state,-xend,xend);
 			x0(0) = xstart;
-			p0(0) = vv(iv)*mass;
+			p0(0) = p0(1) = vv(iv)*mass/sqrt(2);
 			AA.init(mass,Temp,lambda,x0,p0,state,dt,-xend,xend);
 			EE.init(rho0,HH,beta,dt);
 			// run fssh
