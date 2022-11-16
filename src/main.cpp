@@ -58,8 +58,8 @@ int main()
 	//
 	int sample_myself;
 	double tmp,tmp2;
-	double *x_final, *p_final, **p_finaln;
-	double *x_final_all, *p_final_all, **p_finaln_all;
+	double *x_final, *y_final, *p_final, **p_finaln;
+	double *x_final_all, *y_final_all, *p_final_all, **p_finaln_all;
 	//
 	vec vv = linspace(sqrt(2*ek0/mass),sqrt(2*ek1/mass),nek);
 	vec counter_t(HH.sz_f,fill::zeros), counter_r(HH.sz_f,fill::zeros);
@@ -68,8 +68,10 @@ int main()
 	//
 	sample_myself = sample / size;
 	x_final = new double[sample_myself];
+	y_final = new double[sample_myself];
 	p_final = new double[sample_myself];
 	x_final_all = new double[sample_myself*size];
+	y_final_all = new double[sample_myself*size];
 	p_final_all = new double[sample_myself*size];
 	p_finaln = new double*[4];
 	p_finaln_all = new double*[4];
@@ -128,6 +130,7 @@ int main()
 				//cout<<iter*time_evo.dt<<'\t'<<abs(EE.rho_fock(0,0))<<'\t'<<abs(EE.rho_fock(1,1))<<endl;
 			}
 			x_final[isample] = AA.x(0);
+			y_final[isample] = AA.x(1);
 			p_final[isample] = AA.p(0);
 			p_finaln[AA.istate][isample] = AA.p(0);
 			// count rate
@@ -147,6 +150,7 @@ int main()
 			counter_r(t1) = tmp2;
 		}
 		MPI_Gather(x_final,sample_myself,MPI_DOUBLE,x_final_all,sample_myself,MPI_DOUBLE,0,MPI_COMM_WORLD);
+		MPI_Gather(y_final,sample_myself,MPI_DOUBLE,y_final_all,sample_myself,MPI_DOUBLE,0,MPI_COMM_WORLD);
 		MPI_Gather(p_final,sample_myself,MPI_DOUBLE,p_final_all,sample_myself,MPI_DOUBLE,0,MPI_COMM_WORLD);
 		MPI_Gather(p_finaln[0],sample_myself,MPI_DOUBLE,p_finaln_all[0],sample_myself,MPI_DOUBLE,0,MPI_COMM_WORLD);
 		MPI_Gather(p_finaln[1],sample_myself,MPI_DOUBLE,p_finaln_all[1],sample_myself,MPI_DOUBLE,0,MPI_COMM_WORLD);
@@ -183,6 +187,11 @@ int main()
 			ff.open("xx_v-"+to_string(iv)+".dat");
 			for(int t1=0; t1<sample_myself*size; t1++)
 				ff<<x_final_all[t1]<<endl;
+			ff.close();
+			//
+			ff.open("xy_v-"+to_string(iv)+".dat");
+			for(int t1=0; t1<sample_myself*size; t1++)
+				ff<<y_final_all[t1]<<endl;
 			ff.close();
 			//
 			ff.open("px_v-"+to_string(iv)+".dat");
