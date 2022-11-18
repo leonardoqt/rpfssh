@@ -24,12 +24,12 @@ int main()
 	//
 	double gamma = 0.003, Temp = 0.03, lambda = 0.1, omega = 0.003, gap = 0.03, mur = 0.03, de = 0.03, w = 0.1;
 	//
-	double ek0 = 1e-3, ek1 = 1e-1;
+	double ek0 = 1e-3, ek1 = 1e-1, angle = 0;
 	int nek = 60, state = 1, sample = 10000;
 	double dt = 1.0, Tmax = 100000;
 	//
 	if ( rank == 0 )
-		cin>>omega>>gap>>de>>w>>gamma>>mur>>Temp>>lambda>>ek0>>ek1>>nek>>sample>>dt>>Tmax;
+		cin>>omega>>gap>>de>>w>>gamma>>mur>>Temp>>lambda>>ek0>>ek1>>nek>>angle>>sample>>dt>>Tmax;
 	MPI_Bcast(&omega  ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&gap    ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&de     ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
@@ -41,6 +41,7 @@ int main()
 	MPI_Bcast(&ek0    ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&ek1    ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&nek    ,1,MPI_INT   ,0,MPI_COMM_WORLD);
+	MPI_Bcast(&angle  ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&sample ,1,MPI_INT   ,0,MPI_COMM_WORLD);
 	MPI_Bcast(&dt     ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&Tmax   ,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
@@ -116,7 +117,8 @@ int main()
 			//TODO: no rand for testing
 			//AA.init(HH,mass,vv(iv)+randn()*(0.5/sigma_x)/mass,xstart+randn()*sigma_x,state,-xend,xend);
 			x0(0) = xstart;
-			p0(0) = p0(1) = vv(iv)*mass/sqrt(2);
+			p0(0) = vv(iv)*mass*cos(angle*datum::pi / 180.0);
+			p0(1) = vv(iv)*mass*sin(angle*datum::pi / 180.0);
 			AA.init(mass,Temp,lambda,x0,p0,state,dt,-xend,xend);
 			EE.init(rho0,HH,beta,dt);
 			// run fssh
